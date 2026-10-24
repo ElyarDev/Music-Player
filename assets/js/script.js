@@ -5,6 +5,11 @@ const songCover = document.querySelector('.cover-image');
 const coverContainer = document.querySelector('.cover-container');
 const artistName = document.querySelector('.artist-name');
 const songTime = document.querySelector('.duration');
+const currentTime = document.querySelector('.current-time');
+const progress = document.querySelector('.progress-bar');
+const volume = document.querySelector('.volume-slider');
+const speed = document.querySelector('.speed-selector');
+const progressContainer = document.querySelector('.progress-container')
 
 const audio = new Audio();
 
@@ -14,7 +19,7 @@ let isPlayin = false;
 let songs = [{
     id: 1, title: '21', artist: 'Polo G', cover: './assets/img/cover.png', audio: './assets/audio/21-poloG(320).mp3'
 }, {
-    id: 2, title: 'I Know', artist: 'Polo G', cover: './assets/img/cover.png', audio: '../audio/18 - I Know - Polo G (320).mp3'
+    id: 2, title: 'I Know', artist: 'Polo G', cover: './assets/img/cover.png', audio: './assets/audio/18 - I Know - Polo G (320).mp3'
 }, {
     id: 3, title: 'DND', artist: 'Polo G', cover: './assets/img/cover.png', audio: './assets/audio/113 - DND - Polo G (320).mp3'
 }]
@@ -40,7 +45,7 @@ function formatTime(time) {
     if (sec < 10) {
         sec = '0' + sec;
     }
-    return `${min} : ${sec}`
+    return `${min} : ${sec}`;
 }
 
 // PLAY SONG
@@ -63,5 +68,53 @@ playBtn.addEventListener('click', () => {
     isPlayin ? pauseSong() : playSong();
 })
 
-// TEST
+// PROGRESS BAR
+audio.addEventListener('timeupdate', () => {
+    const progressPercent = (audio.currentTime / audio.duration) * 100;
+    progress.style.width = `${progressPercent}%`;
+    currentTime.textContent = formatTime(audio.currentTime);
+})
+
+// VOLUME
+volume.addEventListener('input', () => {
+    audio.volume = volume.value / 100;
+})
+
+// SPEED
+speed.addEventListener('change', () => {
+    audio.playbackRate = speed.value;
+})
+
+// PREV & NEXT
+function nextSong() {
+    currentSong++
+    if (currentSong >= songs.length) {
+        currentSong = 0;
+    }
+    loadAudio(songs[currentSong]);
+    playSong();
+}
+
+function prevSong() {
+    currentSong--
+    if (currentSong < 0) {
+        currentSong = songs.length - 1;
+    }
+    loadAudio(songs[currentSong]);
+    playSong();
+}
+
+// SEEK
+progressContainer.addEventListener('click', (e) => {
+    const width = progressContainer.clientWidth;
+    const clickX = e.offsetX;
+    const duration = audio.duration;
+
+    audio.currentTime = (clickX / width) * duration;
+})
+
+// NEXT SONG AFTER FINISH
+audio.addEventListener('ended', nextSong)
+
+// INIT
 loadAudio(songs[currentSong]);
